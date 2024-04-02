@@ -18,6 +18,9 @@ import json
 import requests
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 
+import os
+from dotenv import find_dotenv, load_dotenv
+
 # 调用文心 API 的工具函数
 def get_access_token(api_key : str, secret_key : str):
     """
@@ -35,7 +38,7 @@ def get_access_token(api_key : str, secret_key : str):
     response = requests.request("POST", url, headers=headers, data=payload)
     return response.json().get("access_token")
 
-class Wenxin_LLM(Self_LLM):
+class Ernie_LLM(Self_LLM):
     # 文心大模型的自定义 LLM
     # URL
     url : str = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant?access_token={}"
@@ -45,47 +48,42 @@ class Wenxin_LLM(Self_LLM):
     access_token: str = None
 
     def init_access_token(self):
-        if self.api_key != None and self.secret_key != None:
-            # 两个 Key 均非空才可以获取 access_token
-            try:
-                self.access_token = get_access_token(self.api_key, self.secret_key)
-            except Exception as e:
-                print(e)
-                print("获取 access_token 失败，请检查 Key")
-        else:
-            print("API_Key 或 Secret_Key 为空，请检查 Key")
+        try:
+            _ = load_dotenv(find_dotenv())
+
+            self.access_token = os.environ["EB_AGENT_ACCESS_TOKEN"]
+        except Exception as e:
+            print(e)
+            print("获取 access_token 失败，请检查 Key")
+        
 
     def _call(self, prompt : str, stop: Optional[List[str]] = None,
                 run_manager: Optional[CallbackManagerForLLMRun] = None,
                 **kwargs: Any):
-        # 如果 access_token 为空，初始化 access_token
-        if self.access_token == None:
-            self.init_access_token()
-        # API 调用 url
-        url = self.url.format(self.access_token)
-        # 配置 POST 参数
-        payload = json.dumps({
-            "messages": [
-                {
-                    "role": "user",# user prompt
-                    "content": "{}".format(prompt)# 输入的 prompt
-                }
-            ],
-            'temperature' : self.temperature
-        })
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        # 发起请求
-        response = requests.request("POST", url, headers=headers, data=payload, timeout=self.request_timeout)
-        if response.status_code == 200:
-            # 返回的是一个 Json 字符串
-            js = json.loads(response.text)
-            # print(js)
-            return js["result"]
+        self.init_access_token()
+        import erniebot
+        erniebot.api_type = "aistudio"
+        erniebot.access_token = self.access_token
+
+        stream = False
+        response = erniebot.ChatCompletion.create(
+            model="ernie-3.5",
+            messages=[{
+                "role": "user",
+                "content": prompt
+            }],
+            temperature=self.temperature,
+            stream=stream)
+
+        result = "请求失败"
+        if stream:
+            for resp in response:
+                result += resp.get_result()
         else:
-            return "请求失败"
+            result = response.get_result()
+        return result
+        
         
     @property
     def _llm_type(self) -> str:
-        return "Wenxin"
+        return "Ernie"

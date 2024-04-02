@@ -24,6 +24,7 @@ _ = load_dotenv(find_dotenv())
 LLM_MODEL_DICT = {
     "openai": ["gpt-3.5-turbo", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0613", "gpt-4", "gpt-4-32k"],
     "wenxin": ["ERNIE-Bot", "ERNIE-Bot-4", "ERNIE-Bot-turbo"],
+    "ernie": ["ERNIE-3.5"],
     "xinhuo": ["Spark-1.5", "Spark-2.0"],
     "zhipuai": ["chatglm_pro", "chatglm_std", "chatglm_lite"]
 }
@@ -31,7 +32,7 @@ LLM_MODEL_DICT = {
 
 LLM_MODEL_LIST = sum(list(LLM_MODEL_DICT.values()),[])
 INIT_LLM = "chatglm_std"
-EMBEDDING_MODEL_LIST = ['zhipuai', 'openai', 'm3e']
+EMBEDDING_MODEL_LIST = ['zhipuai', 'openai', 'm3e', 'ernie']
 INIT_EMBEDDING_MODEL = "openai"
 DEFAULT_DB_PATH = "../../data_base/knowledge_db"
 DEFAULT_PERSIST_PATH = "../../data_base/vector_db/chroma"
@@ -247,3 +248,9 @@ gr.close_all()
 # demo.launch(share=True, server_port=int(os.environ['PORT1']))
 # 直接启动
 demo.launch()
+
+
+if __name__ == '__main__':
+    pass
+    # _, res = model_center.qa_chain_self_answer(question='如何设计神经网络', model='ERNIE-3.5', embedding='ernie', temperature=0.6)
+    # print(_, res)

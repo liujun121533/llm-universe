@@ -1,11 +1,10 @@
 import sys 
-sys.path.append("../llm")
-from wenxin_llm import Wenxin_LLM
-from spark_llm import Spark_LLM
-from zhipuai_llm import ZhipuAILLM
+from llm.wenxin_llm import Wenxin_LLM
+from llm.spark_llm import Spark_LLM
+from llm.zhipuai_llm import ZhipuAILLM
 from langchain.chat_models import ChatOpenAI
-from call_llm import parse_llm_api_key
-
+from llm.call_llm import parse_llm_api_key
+from llm.ernie_llm import Ernie_LLM
 
 def model_to_llm(model:str=None, temperature:float=0.0, appid:str=None, api_key:str=None,Spark_api_secret:str=None,Wenxin_secret_key:str=None):
         """
@@ -22,6 +21,10 @@ def model_to_llm(model:str=None, temperature:float=0.0, appid:str=None, api_key:
             if api_key == None or Wenxin_secret_key == None:
                 api_key, Wenxin_secret_key = parse_llm_api_key("wenxin")
             llm = Wenxin_LLM(model=model, temperature = temperature, api_key=api_key, secret_key=Wenxin_secret_key)
+        elif model in ["ERNIE-3.5"]:
+            if api_key == None or Wenxin_secret_key == None:
+                api_key = parse_llm_api_key("ernie")
+            llm = Ernie_LLM(model=model, temperature = temperature, api_key=api_key, secret_key=Wenxin_secret_key)
         elif model in ["Spark-1.5", "Spark-2.0"]:
             if api_key == None or appid == None and Spark_api_secret == None:
                 api_key, appid, Spark_api_secret = parse_llm_api_key("spark")

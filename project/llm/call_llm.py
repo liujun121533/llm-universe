@@ -48,6 +48,8 @@ def get_completion(prompt :str, model :str, temperature=0.1,api_key=None, secret
         return get_completion_gpt(prompt, model, temperature, api_key, max_tokens)
     elif model in ["ERNIE-Bot", "ERNIE-Bot-4", "ERNIE-Bot-turbo"]:
         return get_completion_wenxin(prompt, model, temperature, api_key, secret_key)
+    elif model in ["ERNIE-3.5"]:
+        return get_completion_ernie(prompt, model, temperature, api_key, secret_key)
     elif model in ["Spark-1.5", "Spark-2.0"]:
         return get_completion_spark(prompt, model, temperature, api_key, appid, api_secret, max_tokens)
     elif model in ["chatglm_pro", "chatglm_std", "chatglm_lite"]:
@@ -86,6 +88,34 @@ def get_access_token(api_key, secret_key):
     # 通过 POST 访问获取账户对应的 access_token
     response = requests.request("POST", url, headers=headers, data=payload)
     return response.json().get("access_token")
+
+
+def get_completion_ernie(prompt : str, model : str, temperature : float, api_key:str, secret_key : str):
+    # 封装百度文心原生接口
+    if secret_key == None:
+        secret_key = parse_llm_api_key("ernie")
+    import erniebot
+    erniebot.api_type = "aistudio"
+    erniebot.access_token = secret_key
+
+    stream = False
+    response = erniebot.ChatCompletion.create(
+        model="ernie-3.5",
+        messages=[{
+            "role": "user",
+            "content": prompt
+        }],
+        temperature=temperature,
+        stream=stream)
+
+    result = ""
+    if stream:
+        for resp in response:
+            result += resp.get_result()
+    else:
+        result = response.get_result()
+    return result
+
 
 def get_completion_wenxin(prompt : str, model : str, temperature : float, api_key:str, secret_key : str):
     # 封装百度文心原生接口
@@ -309,6 +339,8 @@ def parse_llm_api_key(model:str, env_file:dict()=None):
         return env_file["OPENAI_API_KEY"]
     elif model == "wenxin":
         return env_file["wenxin_api_key"], env_file["wenxin_secret_key"]
+    elif model == "ernie":
+        return env_file["EB_AGENT_ACCESS_TOKEN"]
     elif model == "spark":
         return env_file["spark_api_key"], env_file["spark_appid"], env_file["spark_api_secret"]
     elif model == "zhipuai":
@@ -316,3 +348,8 @@ def parse_llm_api_key(model:str, env_file:dict()=None):
         # return env_file["ZHIPUAI_API_KEY"]
     else:
         raise ValueError(f"model{model} not support!!!")
+
+
+if __name__ == '__main__':
+    res = get_completion(prompt='介绍一下Python吧', model='ERNIE-3.5')
+    print(res)

@@ -7,11 +7,13 @@ import time
 import tempfile
 from dotenv import load_dotenv, find_dotenv
 from embedding.call_embedding import get_embedding
-from langchain.document_loaders import UnstructuredFileLoader
-from langchain.document_loaders import UnstructuredMarkdownLoader
+# from langchain.document_loaders import UnstructuredFileLoader
+# from langchain.document_loaders import UnstructuredMarkdownLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PyMuPDFLoader
-from langchain.vectorstores import Chroma
+# from langchain.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyMuPDFLoader, UnstructuredFileLoader, UnstructuredMarkdownLoader
+# from langchain.vectorstores import Chroma
+from langchain_community.vectorstores.chroma import Chroma
 # 首先实现基本配置
 
 
@@ -86,6 +88,7 @@ def create_db(files=DEFAULT_DB_PATH, persist_directory=DEFAULT_PERSIST_PATH, emb
         persist_directory=persist_directory  # 允许我们将persist_directory目录保存到磁盘上
     )
     vectordb.persist()
+    print(f'saved in {persist_directory}')
     return vectordb
 
 
@@ -118,4 +121,4 @@ def load_knowledge_db(path, embeddings):
 
 
 if __name__ == "__main__":
-    create_db(embeddings="openai")
+    create_db(embeddings="ernie", files='/data/liujun/learning/llms/llm-universe/data_base/knowledge_db/test')
