@@ -88,7 +88,7 @@ def create_db(files=DEFAULT_DB_PATH, persist_directory=DEFAULT_PERSIST_PATH, emb
         persist_directory=persist_directory  # 允许我们将persist_directory目录保存到磁盘上
     )
     vectordb.persist()
-    print(f'saved in {persist_directory}')
+    print(f'saved in {persist_directory}, num: {vectordb._collection.count()}')
     return vectordb
 
 

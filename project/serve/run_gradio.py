@@ -252,5 +252,5 @@ demo.launch()
 
 if __name__ == '__main__':
     pass
-    # _, res = model_center.qa_chain_self_answer(question='如何设计神经网络', model='ERNIE-3.5', embedding='ernie', temperature=0.6)
+    # _, res = model_center.qa_chain_self_answer(question='如何设计神经网络', model='ERNIE-3.5', embedding='ernie', temperature=0.1)
     # print(_, res)
